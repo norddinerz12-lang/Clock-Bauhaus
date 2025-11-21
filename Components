@@ -1,1 +1,307 @@
 
+import React from 'react';
+import { ColorPillProps } from '../types';
+
+const colors: ColorPillProps[] = [
+  { name: "Red", color: "red-500", hex: "#FF3B30" },
+  { name: "Amber", color: "amber-500", hex: "#FF9500" },
+  { name: "Lavender", color: "purple-400", hex: "#AF52DE" },
+  { name: "Rose", color: "pink-400", hex: "#FF2D55" },
+  { name: "Seafoam", color: "teal-300", hex: "#30D158" },
+  { name: "Sky", color: "sky-400", hex: "#007AFF" },
+  { name: "Swiss BGW9", color: "blue-200", hex: "#5AC8FA" },
+  { name: "Peach", color: "orange-300", hex: "#FFCC00" },
+  { name: "Tritium Green", color: "green-400", hex: "#34C759" },
+  { name: "Aqua", color: "cyan-400", hex: "#32ADE6" },
+  { name: "Yellow", color: "yellow-400", hex: "#FFD60A" },
+  { name: "Lime", color: "lime-400", hex: "#A4C400" },
+  { name: "Ice Blue", color: "cyan-200", hex: "#66D4CF" },
+];
+
+export const NightMode: React.FC = () => {
+  return (
+    <div className="w-full bg-black rounded-[40px] p-12 md:p-24 text-center relative overflow-hidden">
+        {/* Background ambient glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-t from-blue-900/20 to-transparent pointer-events-none"></div>
+
+      <div className="relative z-10 max-w-4xl mx-auto">
+        <h2 className="text-3xl md:text-5xl font-semibold text-white mb-4 tracking-tight">
+          Night Mode. <br />
+          <span className="text-gray-400">Thoughtfully Illuminated.</span>
+        </h2>
+        <p className="text-gray-400 mb-16 text-lg">
+          Selected luminescent colors that glow beautifully in your space.
+        </p>
+
+        <div className="flex justify-center items-end gap-2 md:gap-4 h-64">
+          {colors.map((c, i) => (
+            <div key={c.name} className="group flex flex-col items-center gap-4 cursor-pointer">
+              <div 
+                className="w-6 md:w-12 rounded-full transition-all duration-500 ease-out hover:scale-110 hover:-translate-y-4"
+                style={{ 
+                    height: `${140 + Math.sin(i) * 40}px`,
+                    backgroundColor: c.hex,
+                    boxShadow: `0 0 30px ${c.hex}40`
+                }}
+              >
+              </div>
+              <span className="text-[10px] font-medium text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-6 whitespace-nowrap">
+                {c.name}
+              </span>
+            </div>
+          ))}
+        </div>
+        
+        {/* Label row for default view (simplified) */}
+        <div className="flex justify-center gap-2 md:gap-4 mt-6 border-t border-white/10 pt-4">
+           {colors.filter((_, i) => i % 3 === 0).map((c) => (
+               <span key={c.name} className="text-[10px] text-gray-600 hidden md:inline-block">{c.name}</span>
+           ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+import React, { useState, useEffect } from 'react';
+import { BauhausClock } from './BauhausClock';
+import { MapPin } from 'lucide-react';
+
+const cities = [
+  { name: 'San Francisco', timezone: 'America/Los_Angeles' },
+  { name: 'New York', timezone: 'America/New_York' },
+  { name: 'London', timezone: 'Europe/London' },
+  { name: 'Paris', timezone: 'Europe/Paris' },
+  { name: 'Dubai', timezone: 'Asia/Dubai' },
+  { name: 'Tokyo', timezone: 'Asia/Tokyo' },
+  { name: 'Sydney', timezone: 'Australia/Sydney' },
+];
+
+export const TimezoneSelector: React.FC = () => {
+  const [selectedCityIndex, setSelectedCityIndex] = useState(1); // Default New York
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      // Create a date object adjusted for the selected city's timezone
+      const city = cities[selectedCityIndex];
+      const now = new Date();
+      const timeString = now.toLocaleString("en-US", { timeZone: city.timezone });
+      setCurrentTime(new Date(timeString));
+    }, 1000);
+    
+    // Initial set
+    const city = cities[selectedCityIndex];
+    const now = new Date();
+    const timeString = now.toLocaleString("en-US", { timeZone: city.timezone });
+    setCurrentTime(new Date(timeString));
+
+    return () => clearInterval(timer);
+  }, [selectedCityIndex]);
+
+  return (
+    <div className="w-full bg-white rounded-[40px] p-10 md:p-16 shadow-sm overflow-hidden relative">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+            
+            <div className="space-y-6 flex-1 z-10">
+                <div>
+                    <h3 className="text-3xl font-semibold tracking-tight mb-2">Global time, locally rendered.</h3>
+                    <p className="text-gray-500">Select a city to instantly transport the clock face.</p>
+                </div>
+
+                <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
+                        {cities.map((city, idx) => (
+                            <button
+                                key={city.name}
+                                onClick={() => setSelectedCityIndex(idx)}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                                    selectedCityIndex === idx 
+                                    ? 'bg-black text-white shadow-lg scale-105' 
+                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                }`}
+                            >
+                                {city.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-sm font-medium text-blue-600 animate-fade-in">
+                    <MapPin size={16} />
+                    <span>{cities[selectedCityIndex].timezone}</span>
+                </div>
+            </div>
+
+            <div className="relative flex-1 flex justify-center">
+                {/* Decorative background ring */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-blue-50 to-transparent rounded-full scale-150 opacity-50 pointer-events-none blur-3xl"></div>
+                
+                <div className="relative transition-all duration-500 ease-out-back transform" key={selectedCityIndex}>
+                    <div className="bg-white p-6 rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] ring-1 ring-black/5">
+                        <BauhausClock 
+                            size={280} 
+                            time={currentTime} 
+                            tickRate="quartz" 
+                        />
+                    </div>
+                    
+                    {/* Floating time label */}
+                    <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-md border border-white/20 shadow-sm px-4 py-1 rounded-full text-xs font-mono text-gray-500">
+                        {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+  );
+};
+
+
+import React, { useEffect, useState } from 'react';
+import { ClockProps } from '../types';
+
+export const BauhausClock: React.FC<ClockProps> = ({ 
+  size = 300, 
+  className = "", 
+  hideNumbers = false,
+  tickRate = 'smooth',
+  theme = 'light',
+  time: controlledTime
+}) => {
+  const [internalTime, setInternalTime] = useState(new Date());
+
+  useEffect(() => {
+    if (controlledTime) return; // Don't run interval if time is controlled
+
+    const intervalId = setInterval(() => {
+      setInternalTime(new Date());
+    }, tickRate === 'quartz' ? 1000 : 16); // 60fps for smooth, 1s for quartz
+
+    return () => clearInterval(intervalId);
+  }, [tickRate, controlledTime]);
+
+  const time = controlledTime || internalTime;
+
+  const seconds = time.getSeconds() + (tickRate === 'smooth' ? time.getMilliseconds() / 1000 : 0);
+  const minutes = time.getMinutes() + seconds / 60;
+  const hours = (time.getHours() % 12) + minutes / 60;
+
+  const radius = size / 2;
+  const center = radius;
+  
+  // Design constants
+  const tickLength = size * 0.08;
+  const tickStart = radius - size * 0.15;
+  const numberRadius = radius - size * 0.25;
+
+  // Colors based on theme
+  const handColor = theme === 'dark' ? 'white' : '#1D1D1F';
+  const secondHandColor = '#86868B'; // Silver/Gray
+  const faceColor = theme === 'dark' ? '#161617' : 'white';
+  const textColor = theme === 'dark' ? 'white' : '#1D1D1F';
+  const tickColor = theme === 'dark' ? 'rgba(255,255,255,0.8)' : '#1D1D1F';
+
+  // Generate ticks
+  const ticks = Array.from({ length: 60 }).map((_, i) => {
+    const angle = (i * 6) * (Math.PI / 180);
+    const isHour = i % 5 === 0;
+    
+    const x1 = center + Math.sin(angle) * (tickStart);
+    const y1 = center - Math.cos(angle) * (tickStart);
+    const x2 = center + Math.sin(angle) * (tickStart + (isHour ? tickLength : tickLength * 0.5));
+    const y2 = center - Math.cos(angle) * (tickStart + (isHour ? tickLength : tickLength * 0.5));
+
+    return (
+      <line
+        key={i}
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        stroke={tickColor}
+        strokeWidth={isHour ? size * 0.008 : size * 0.004}
+        strokeLinecap="round"
+      />
+    );
+  });
+
+  // Numbers configuration
+  const numbers = [12, 2, 3, 5, 6, 9, 10].map((num) => {
+    const angle = (num * 30) * (Math.PI / 180);
+    const x = center + Math.sin(angle) * numberRadius;
+    const y = center - Math.cos(angle) * numberRadius;
+    
+    return (
+      <text
+        key={num}
+        x={x}
+        y={y}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill={textColor}
+        fontSize={size * 0.08}
+        fontFamily="Inter, sans-serif"
+        fontWeight="500"
+      >
+        {num === 12 ? '12' : num}
+      </text>
+    );
+  });
+
+  return (
+    <div className={`relative flex items-center justify-center ${className}`} style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        {/* Face Background */}
+        <circle cx={center} cy={center} r={radius * 0.98} fill={faceColor} />
+        
+        {/* Ticks */}
+        <g>{ticks}</g>
+
+        {/* Numbers */}
+        {!hideNumbers && <g>{numbers}</g>}
+
+        {/* Hour Hand */}
+        <line
+          x1={center}
+          y1={center}
+          x2={center + Math.sin(hours * 30 * Math.PI / 180) * (radius * 0.5)}
+          y2={center - Math.cos(hours * 30 * Math.PI / 180) * (radius * 0.5)}
+          stroke={handColor}
+          strokeWidth={size * 0.025}
+          strokeLinecap="round"
+        />
+
+        {/* Minute Hand */}
+        <line
+          x1={center}
+          y1={center}
+          x2={center + Math.sin(minutes * 6 * Math.PI / 180) * (radius * 0.75)}
+          y2={center - Math.cos(minutes * 6 * Math.PI / 180) * (radius * 0.75)}
+          stroke={handColor}
+          strokeWidth={size * 0.02}
+          strokeLinecap="round"
+        />
+
+        {/* Second Hand */}
+        <g transform={`rotate(${seconds * 6} ${center} ${center})`}>
+             <line
+            x1={center}
+            y1={center + size * 0.1}
+            x2={center}
+            y2={center - radius * 0.8}
+            stroke={secondHandColor}
+            strokeWidth={size * 0.008}
+            strokeLinecap="round"
+          />
+           <circle cx={center} cy={center} r={size * 0.015} fill="white" stroke={secondHandColor} strokeWidth={2} />
+           <circle cx={center} cy={center - radius * 0.8} r={size * 0.02} fill={secondHandColor} />
+        </g>
+
+        {/* Center Cap */}
+        <circle cx={center} cy={center} r={size * 0.03} fill="white" stroke={secondHandColor} strokeWidth={2} />
+      </svg>
+    </div>
+  );
+};
